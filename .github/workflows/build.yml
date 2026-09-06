@@ -1,7 +1,9 @@
-      name: Build Android APK
+name: Build Android APK
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ main ]
 
 jobs:
   build:
@@ -20,19 +22,20 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Create Flutter Base
+      - name: Create Skeleton and Build
         run: |
-          flutter create --org com.truckerpark.app app_temp
-          cp -r app_temp/* .
-          cp -r app_temp/.[!.]* . 2>/dev/null || true
-          rm -rf app_temp
-
-      - name: Build APK
-        run: flutter build apk --debug
+          mkdir temp_app
+          cd temp_app
+          flutter create --org com.truckerpark.app app
+          cd app
+          cp -f ../../lib/main.dart lib/main.dart
+          flutter build apk --debug
+          mkdir -p ../../output
+          cp build/app/outputs/flutter-apk/app-debug.apk ../../output/TruckerPark.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: TruckerPark-App
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          path: output/TruckerPark.apk
           
